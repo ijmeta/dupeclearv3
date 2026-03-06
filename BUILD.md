@@ -1,4 +1,4 @@
-# DupeClear — Build Guide
+# Dedupix — Build Guide
 
 ## Requirements
 - **Node.js 18+**: https://nodejs.org (click "LTS" download)
@@ -20,15 +20,15 @@ npm run dist
 ```
 Expected output (last few lines):
 ```
-  • building        target=NSIS file=release\DupeClear Setup 1.0.0.exe
-  • building        target=portable file=release\DupeClear-Portable-1.0.0.exe
+  • building        target=NSIS file=release\Dedupix Setup 1.0.0.exe
+  • building        target=portable file=release\Dedupix-Portable-1.0.0.exe
   • build success
 ```
 
 ### Step 3 — Find your files
 Look in the `release\` folder:
-- `DupeClear Setup 1.0.0.exe` — installer with Start Menu shortcut
-- `DupeClear-Portable-1.0.0.exe` — single .exe, no install needed
+- `Dedupix Setup 1.0.0.exe` — installer with Start Menu shortcut
+- `Dedupix-Portable-1.0.0.exe` — single .exe, no install needed
 
 ---
 

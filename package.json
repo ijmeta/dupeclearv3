@@ -1,8 +1,8 @@
 {
-  "name": "dupeclear",
+  "name": "dedupix",
   "version": "1.0.0",
   "description": "Photo Duplicate Remover for Windows",
-  "author": "DupeClear",
+  "author": "Dedupix",
   "homepage": "./",
   "main": "electron/main.js",
   "scripts": {
@@ -13,9 +13,9 @@
     "dist:portable": "npm run build && electron-builder --win portable --x64"
   },
   "build": {
-    "appId": "com.dupeclear.app",
-    "productName": "DupeClear",
-    "copyright": "Copyright © 2026 DupeClear",
+    "appId": "com.dedupix.app",
+    "productName": "Dedupix",
+    "copyright": "Copyright © 2026 Dedupix",
     "directories": {
       "output": "release"
     },
@@ -46,10 +46,10 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "DupeClear"
+      "shortcutName": "Dedupix"
     },
     "portable": {
-      "artifactName": "DupeClear-Portable-${version}.exe"
+      "artifactName": "Dedupix-Portable-${version}.exe"
     }
   },
   "dependencies": {

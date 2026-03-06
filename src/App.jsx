@@ -212,7 +212,7 @@ function AppHeader({ screen, reset }) {
               <path d="M9 1.5L16.5 14.5H1.5L9 1.5Z" fill="white" fillOpacity="0.9"/>
             </svg>
           </div>
-          <span className="sf-logo-name">DupeClear</span>
+          <span className="sf-logo-name">Dedupix</span>
         </div>
         <div className="sf-header-center">
           {screen !== S.HOME && (
@@ -245,7 +245,7 @@ function HomeScreen({ rawFiles, folderName, totalSize, recursive, setRecursive, 
       <div className="sf-hero">
         <div className="sf-hero-eyebrow">Photo Library Cleaner</div>
         <h1 className="sf-hero-h1">Your memories,<br/>without the clutter.</h1>
-        <p className="sf-hero-sub">Free up space by finding photos you've stored twice — or ten times. DupeClear spots every duplicate so you can keep what matters and let go of the rest.</p>
+        <p className="sf-hero-sub">Free up space by finding photos you've stored twice — or ten times. Dedupix spots every duplicate so you can keep what matters and let go of the rest.</p>
       </div>
 
       {/* Main card */}

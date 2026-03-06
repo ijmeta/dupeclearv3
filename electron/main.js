@@ -11,7 +11,7 @@ function createWindow() {
     height:         800,
     minWidth:       960,
     minHeight:      600,
-    title:          'DupeClear — Photo Duplicate Remover',
+    title:          'Dedupix — Photo Duplicate Remover',
     backgroundColor: '#F0EDE8',
     webPreferences: {
       preload:          path.join(__dirname, 'preload.js'),

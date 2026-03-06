@@ -1,7 +1,5 @@
 node_modules/
 release/
-landing/releases/
 dist/
-*.exe
 *.dmg
 *.AppImage

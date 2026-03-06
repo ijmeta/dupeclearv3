@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DupeClear — Remove Duplicate Photos Instantly</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black:   #1d1d1f;
+      --gray:    #6e6e73;
+      --light:   #f5f5f7;
+      --white:   #ffffff;
+      --blue:    #0071e3;
+      --blue-dk: #0058b0;
+      --purple:  #7c3aed;
+      --border:  #d2d2d7;
+      --radius:  18px;
+      --shadow:  0 4px 32px rgba(0,0,0,.10);
+      --shadow-lg: 0 20px 60px rgba(0,0,0,.16);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+      background: var(--white);
+      color: var(--black);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── NAV ───────────────────────────────────────────────────── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(255,255,255,.82);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 1px solid rgba(0,0,0,.08);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 40px; height: 52px;
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 17px; font-weight: 600; color: var(--black); text-decoration: none;
+    }
+    .nav-logo svg { width: 28px; height: 28px; }
+    .nav-links { display: flex; gap: 28px; }
+    .nav-links a {
+      font-size: 14px; color: var(--black); text-decoration: none;
+      opacity: .8; transition: opacity .15s;
+    }
+    .nav-links a:hover { opacity: 1; }
+    .nav-cta {
+      background: var(--blue); color: #fff;
+      font-size: 14px; font-weight: 500;
+      padding: 7px 18px; border-radius: 980px;
+      text-decoration: none; transition: background .15s;
+    }
+    .nav-cta:hover { background: var(--blue-dk); }
+
+    /* ── HERO ──────────────────────────────────────────────────── */
+    .hero {
+      background: linear-gradient(160deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+      color: #fff;
+      padding: 100px 40px 0;
+      text-align: center;
+      overflow: hidden;
+      position: relative;
+    }
+    .hero::before {
+      content: "";
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(112,90,255,.35), transparent);
+      pointer-events: none;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(255,255,255,.1);
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 980px; padding: 5px 14px;
+      font-size: 13px; font-weight: 500; margin-bottom: 28px;
+      backdrop-filter: blur(10px);
+    }
+    .hero-badge span { width: 6px; height: 6px; border-radius: 50%; background: #34d399; display: inline-block; }
+    .hero h1 {
+      font-size: clamp(40px, 7vw, 80px);
+      font-weight: 700; letter-spacing: -.03em;
+      line-height: 1.05; margin-bottom: 22px;
+      background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,.7) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero p {
+      font-size: clamp(17px, 2.5vw, 21px);
+      color: rgba(255,255,255,.7);
+      max-width: 580px; margin: 0 auto 44px;
+      line-height: 1.5;
+    }
+    .hero-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-bottom: 70px; }
+    .btn-primary {
+      background: var(--blue); color: #fff;
+      font-size: 17px; font-weight: 500;
+      padding: 16px 36px; border-radius: 980px;
+      text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+      transition: background .15s, transform .15s;
+      box-shadow: 0 0 0 0 rgba(0,113,227,.5);
+    }
+    .btn-primary:hover { background: var(--blue-dk); transform: translateY(-1px); }
+    .btn-secondary {
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.25);
+      color: #fff;
+      font-size: 17px; font-weight: 500;
+      padding: 16px 36px; border-radius: 980px;
+      text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+      backdrop-filter: blur(10px);
+      transition: background .15s, transform .15s;
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,.2); transform: translateY(-1px); }
+
+    /* ── HERO MOCKUP ───────────────────────────────────────────── */
+    .hero-mockup {
+      max-width: 900px; margin: 0 auto;
+      border-radius: 16px 16px 0 0;
+      overflow: hidden;
+      box-shadow: 0 -4px 80px rgba(112,90,255,.3), 0 0 0 1px rgba(255,255,255,.08);
+      background: #1c1c1e;
+    }
+    .mockup-titlebar {
+      background: #2c2c2e;
+      padding: 12px 16px;
+      display: flex; align-items: center; gap: 8px;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .dot { width: 12px; height: 12px; border-radius: 50%; }
+    .dot-red { background: #ff5f57; }
+    .dot-yellow { background: #febc2e; }
+    .dot-green { background: #28c840; }
+    .mockup-titlebar-text {
+      flex: 1; text-align: center;
+      font-size: 13px; color: rgba(255,255,255,.4); margin-left: -52px;
+    }
+
+    /* ── STATS ─────────────────────────────────────────────────── */
+    .stats {
+      background: var(--black); color: #fff;
+      padding: 40px;
+      display: flex; justify-content: center; gap: 80px; flex-wrap: wrap;
+    }
+    .stat { text-align: center; }
+    .stat-num { font-size: 36px; font-weight: 700; letter-spacing: -.02em; }
+    .stat-num span { color: var(--blue); }
+    .stat-label { font-size: 14px; color: rgba(255,255,255,.5); margin-top: 4px; }
+
+    /* ── SECTION SHARED ────────────────────────────────────────── */
+    section { padding: 100px 40px; }
+    .section-label {
+      font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+      color: var(--blue); margin-bottom: 12px;
+    }
+    .section-title {
+      font-size: clamp(28px, 4vw, 48px);
+      font-weight: 700; letter-spacing: -.025em; line-height: 1.1;
+      margin-bottom: 16px;
+    }
+    .section-sub {
+      font-size: 18px; color: var(--gray); max-width: 560px; line-height: 1.55;
+    }
+    .section-header { margin-bottom: 64px; }
+
+    /* ── HOW IT WORKS ──────────────────────────────────────────── */
+    .how { background: var(--light); }
+    .how .section-header { text-align: center; }
+    .how .section-sub { margin: 0 auto; }
+
+    .steps {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px;
+      max-width: 1100px; margin: 0 auto;
+    }
+    .step-card {
+      background: var(--white); border-radius: var(--radius);
+      padding: 36px 32px;
+      box-shadow: var(--shadow);
+      transition: transform .2s, box-shadow .2s;
+      position: relative;
+    }
+    .step-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+    .step-num {
+      width: 40px; height: 40px; border-radius: 12px;
+      background: var(--blue); color: #fff;
+      font-size: 18px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 24px;
+    }
+    .step-card h3 { font-size: 20px; font-weight: 600; margin-bottom: 10px; }
+    .step-card p { font-size: 15px; color: var(--gray); line-height: 1.55; margin-bottom: 28px; }
+    .step-wireframe {
+      border-radius: 10px; overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--light);
+    }
+
+    /* ── FEATURES ──────────────────────────────────────────────── */
+    .features-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2px; background: var(--border);
+      max-width: 1100px; margin: 0 auto;
+      border-radius: var(--radius); overflow: hidden;
+    }
+    .feature-cell {
+      background: var(--white); padding: 40px 36px;
+      transition: background .15s;
+    }
+    .feature-cell:hover { background: var(--light); }
+    .feature-icon {
+      width: 48px; height: 48px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 20px; font-size: 24px;
+    }
+    .feature-icon.blue  { background: #e8f1fd; }
+    .feature-icon.green { background: #e6f9f0; }
+    .feature-icon.purple{ background: #f0eaff; }
+    .feature-icon.orange{ background: #fff3e8; }
+    .feature-icon.red   { background: #fde8e8; }
+    .feature-icon.teal  { background: #e8f7f9; }
+    .feature-cell h3 { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+    .feature-cell p { font-size: 15px; color: var(--gray); line-height: 1.55; }
+
+    /* ── SHOWCASE ──────────────────────────────────────────────── */
+    .showcase { background: var(--light); }
+    .showcase-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;
+    }
+    .showcase-inner.reverse { direction: rtl; }
+    .showcase-inner.reverse > * { direction: ltr; }
+    .showcase-text .section-label { margin-top: 0; }
+    .showcase-text h2 {
+      font-size: clamp(26px, 3.5vw, 40px);
+      font-weight: 700; letter-spacing: -.025em; line-height: 1.15;
+      margin-bottom: 16px;
+    }
+    .showcase-text p { font-size: 16px; color: var(--gray); line-height: 1.6; margin-bottom: 24px; }
+    .check-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .check-list li {
+      display: flex; align-items: flex-start; gap: 10px;
+      font-size: 15px; color: var(--black);
+    }
+    .check-list li::before {
+      content: "";
+      width: 20px; height: 20px; flex-shrink: 0;
+      background: var(--blue); border-radius: 50%;
+      display: inline-flex;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='white'%3E%3Cpath fill-rule='evenodd' d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z' clip-rule='evenodd'/%3E%3C/svg%3E");
+      background-size: 14px; background-repeat: no-repeat; background-position: center;
+    }
+    .showcase-visual {
+      border-radius: var(--radius); overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      background: #1c1c1e;
+    }
+
+    /* ── DOWNLOAD ──────────────────────────────────────────────── */
+    .download {
+      background: linear-gradient(160deg, #0f0c29 0%, #302b63 60%, #24243e 100%);
+      text-align: center; color: #fff;
+      position: relative; overflow: hidden;
+    }
+    .download::before {
+      content: ""; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 80% at 50% 50%, rgba(112,90,255,.2), transparent);
+      pointer-events: none;
+    }
+    .download h2 {
+      font-size: clamp(30px, 5vw, 56px);
+      font-weight: 700; letter-spacing: -.03em;
+      margin-bottom: 16px;
+    }
+    .download p { font-size: 18px; color: rgba(255,255,255,.65); margin-bottom: 48px; }
+    .download-cards {
+      display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;
+      max-width: 700px; margin: 0 auto;
+    }
+    .download-card {
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: var(--radius); padding: 32px 36px;
+      flex: 1; min-width: 260px; max-width: 300px;
+      backdrop-filter: blur(20px);
+      transition: background .2s, transform .2s;
+      text-decoration: none; color: #fff;
+      display: flex; flex-direction: column; align-items: center; gap: 14px;
+    }
+    .download-card:hover { background: rgba(255,255,255,.13); transform: translateY(-4px); }
+    .download-card svg { width: 48px; height: 48px; opacity: .9; }
+    .download-card h3 { font-size: 20px; font-weight: 600; }
+    .download-card p { font-size: 14px; color: rgba(255,255,255,.55); text-align: center; line-height: 1.5; }
+    .download-btn {
+      margin-top: 8px;
+      background: var(--blue); color: #fff;
+      font-size: 15px; font-weight: 500;
+      padding: 11px 28px; border-radius: 980px;
+      text-decoration: none; transition: background .15s;
+    }
+    .download-btn:hover { background: var(--blue-dk); }
+    .download-note { margin-top: 32px; font-size: 13px; color: rgba(255,255,255,.35); }
+
+    /* ── FOOTER ────────────────────────────────────────────────── */
+    footer {
+      background: var(--black); color: rgba(255,255,255,.5);
+      padding: 40px; text-align: center; font-size: 13px;
+      display: flex; flex-direction: column; align-items: center; gap: 16px;
+    }
+    footer a { color: rgba(255,255,255,.5); text-decoration: none; }
+    footer a:hover { color: #fff; }
+    .footer-links { display: flex; gap: 24px; }
+
+    /* ── RESPONSIVE ────────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      nav { padding: 0 20px; }
+      .nav-links { display: none; }
+      .hero { padding: 80px 24px 0; }
+      section { padding: 72px 24px; }
+      .stats { gap: 40px; }
+      .showcase-inner { grid-template-columns: 1fr; gap: 36px; }
+      .showcase-inner.reverse { direction: ltr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══ NAV ════════════════════════════════════════════════════ -->
+<nav>
+  <a class="nav-logo" href="#">
+    <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="28" height="28" rx="8" fill="#0071e3"/>
+      <path d="M8 10h7M8 14h12M8 18h9" stroke="white" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="20" cy="10" r="3" fill="white"/>
+      <circle cx="20" cy="10" r="1.5" fill="#0071e3"/>
+    </svg>
+    DupeClear
+  </a>
+  <div class="nav-links">
+    <a href="#how-it-works">How it works</a>
+    <a href="#features">Features</a>
+    <a href="#download">Download</a>
+  </div>
+  <a class="nav-cta" href="#download">Download Free</a>
+</nav>
+
+<!-- ═══ HERO ════════════════════════════════════════════════════ -->
+<section class="hero">
+  <div class="hero-badge">
+    <span></span> Free for Windows — No account required
+  </div>
+  <h1>Your photo library,<br>finally clean.</h1>
+  <p>DupeClear finds and removes duplicate photos in seconds — saving storage, reducing clutter, and giving you back control of your library.</p>
+  <div class="hero-btns">
+    <a class="btn-primary" href="#download">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 16l-5-5h3V4h4v7h3l-5 5zm-7 4h14v-2H5v2z"/></svg>
+      Download Free
+    </a>
+    <a class="btn-secondary" href="#how-it-works">
+      See how it works
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5l8 7-8 7"/></svg>
+    </a>
+  </div>
+
+  <!-- App Mockup -->
+  <div class="hero-mockup">
+    <div class="mockup-titlebar">
+      <div class="dot dot-red"></div>
+      <div class="dot dot-yellow"></div>
+      <div class="dot dot-green"></div>
+      <div class="mockup-titlebar-text">DupeClear</div>
+    </div>
+    <!-- Hero screen wireframe -->
+    <svg viewBox="0 0 900 480" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%">
+      <rect width="900" height="480" fill="#1c1c1e"/>
+      <!-- Left sidebar -->
+      <rect x="0" y="0" width="200" height="480" fill="#2c2c2e"/>
+      <rect x="20" y="24" width="120" height="10" rx="5" fill="#48484a"/>
+      <rect x="20" y="54" width="160" height="36" rx="10" fill="#0071e3" opacity=".9"/>
+      <rect x="40" y="68" width="80" height="8" rx="4" fill="white" opacity=".9"/>
+      <rect x="20" y="100" width="160" height="36" rx="10" fill="#3a3a3c"/>
+      <rect x="40" y="114" width="100" height="8" rx="4" fill="#8e8e93"/>
+      <rect x="20" y="146" width="160" height="36" rx="10" fill="#3a3a3c"/>
+      <rect x="40" y="160" width="90" height="8" rx="4" fill="#8e8e93"/>
+      <!-- Divider -->
+      <line x1="200" y1="0" x2="200" y2="480" stroke="#3a3a3c" stroke-width="1"/>
+      <!-- Main content area -->
+      <!-- Top bar -->
+      <rect x="220" y="20" width="300" height="36" rx="10" fill="#2c2c2e"/>
+      <rect x="236" y="32" width="160" height="10" rx="5" fill="#48484a"/>
+      <circle cx="240" cy="38" r="6" fill="#48484a"/>
+      <!-- Stat cards row -->
+      <rect x="220" y="70" width="165" height="70" rx="12" fill="#2c2c2e"/>
+      <rect x="236" y="86" width="60" height="10" rx="5" fill="#8e8e93"/>
+      <rect x="236" y="104" width="90" height="16" rx="5" fill="white" opacity=".9"/>
+      <rect x="400" y="70" width="165" height="70" rx="12" fill="#2c2c2e"/>
+      <rect x="416" y="86" width="60" height="10" rx="5" fill="#8e8e93"/>
+      <rect x="416" y="104" width="70" height="16" rx="5" fill="#34d399"/>
+      <rect x="580" y="70" width="165" height="70" rx="12" fill="#2c2c2e"/>
+      <rect x="596" y="86" width="60" height="10" rx="5" fill="#8e8e93"/>
+      <rect x="596" y="104" width="80" height="16" rx="5" fill="#f87171"/>
+      <!-- Photo grid -->
+      <rect x="220" y="158" width="100" height="8" rx="4" fill="#8e8e93"/>
+      <!-- Row 1 -->
+      <rect x="220" y="180" width="155" height="110" rx="10" fill="#2c2c2e"/>
+      <rect x="228" y="188" width="139" height="80" rx="6" fill="#3a3a3c"/>
+      <rect x="240" y="208" width="60" height="40" rx="4" fill="#48484a"/>
+      <rect x="310" y="218" width="40" height="30" rx="4" fill="#48484a"/>
+      <rect x="228" y="274" width="60" height="8" rx="4" fill="#8e8e93"/>
+      <rect x="310" y="274" width="40" height="8" rx="4" fill="#8e8e93"/>
+      <!-- Duplicate badge -->
+      <rect x="340" y="185" width="28" height="16" rx="8" fill="#ef4444"/>
+      <rect x="346" y="190" width="16" height="6" rx="3" fill="white"/>
+
+      <rect x="388" y="180" width="155" height="110" rx="10" fill="#2c2c2e"/>
+      <rect x="396" y="188" width="139" height="80" rx="6" fill="#3a3a3c"/>
+      <rect x="408" y="208" width="60" height="40" rx="4" fill="#48484a"/>
+      <rect x="478" y="218" width="40" height="30" rx="4" fill="#48484a"/>
+      <rect x="396" y="274" width="60" height="8" rx="4" fill="#8e8e93"/>
+      <rect x="478" y="274" width="40" height="8" rx="4" fill="#8e8e93"/>
+      <rect x="508" y="185" width="28" height="16" rx="8" fill="#ef4444"/>
+      <rect x="514" y="190" width="16" height="6" rx="3" fill="white"/>
+
+      <rect x="556" y="180" width="155" height="110" rx="10" fill="#2c2c2e"/>
+      <rect x="564" y="188" width="139" height="80" rx="6" fill="#3a3a3c"/>
+      <rect x="576" y="208" width="60" height="40" rx="4" fill="#48484a"/>
+      <rect x="646" y="218" width="40" height="30" rx="4" fill="#48484a"/>
+      <rect x="564" y="274" width="60" height="8" rx="4" fill="#8e8e93"/>
+      <rect x="646" y="274" width="40" height="8" rx="4" fill="#8e8e93"/>
+
+      <!-- Row 2 -->
+      <rect x="220" y="306" width="155" height="110" rx="10" fill="#2c2c2e"/>
+      <rect x="228" y="314" width="139" height="80" rx="6" fill="#3a3a3c"/>
+      <rect x="240" y="334" width="60" height="40" rx="4" fill="#48484a"/>
+      <rect x="310" y="344" width="40" height="30" rx="4" fill="#48484a"/>
+      <rect x="228" y="400" width="60" height="8" rx="4" fill="#8e8e93"/>
+
+      <rect x="388" y="306" width="155" height="110" rx="10" fill="#2c2c2e"/>
+      <rect x="396" y="314" width="139" height="80" rx="6" fill="#3a3a3c"/>
+      <rect x="408" y="334" width="60" height="40" rx="4" fill="#48484a"/>
+      <rect x="478" y="344" width="40" height="30" rx="4" fill="#48484a"/>
+      <rect x="396" y="400" width="60" height="8" rx="4" fill="#8e8e93"/>
+      <rect x="478" y="400" width="40" height="8" rx="4" fill="#8e8e93"/>
+      <rect x="518" y="311" width="28" height="16" rx="8" fill="#ef4444"/>
+      <rect x="524" y="316" width="16" height="6" rx="3" fill="white"/>
+
+      <rect x="556" y="306" width="155" height="110" rx="10" fill="#2c2c2e"/>
+      <rect x="564" y="314" width="139" height="80" rx="6" fill="#3a3a3c"/>
+      <rect x="576" y="334" width="60" height="40" rx="4" fill="#48484a"/>
+
+      <!-- Right panel -->
+      <rect x="755" y="0" width="145" height="480" fill="#2c2c2e"/>
+      <line x1="755" y1="0" x2="755" y2="480" stroke="#3a3a3c" stroke-width="1"/>
+      <rect x="771" y="24" width="110" height="10" rx="5" fill="#48484a"/>
+      <rect x="771" y="54" width="110" height="80" rx="8" fill="#3a3a3c"/>
+      <rect x="779" y="62" width="94" height="56" rx="4" fill="#48484a"/>
+      <rect x="771" y="144" width="60" height="8" rx="4" fill="#8e8e93"/>
+      <rect x="771" y="160" width="110" height="8" rx="4" fill="#636366"/>
+      <rect x="771" y="176" width="80" height="8" rx="4" fill="#636366"/>
+      <rect x="771" y="210" width="110" height="32" rx="10" fill="#ef4444" opacity=".9"/>
+      <rect x="800" y="222" width="52" height="8" rx="4" fill="white"/>
+      <rect x="771" y="252" width="110" height="32" rx="10" fill="#3a3a3c"/>
+      <rect x="800" y="264" width="52" height="8" rx="4" fill="#8e8e93"/>
+    </svg>
+  </div>
+</section>
+
+<!-- ═══ STATS ════════════════════════════════════════════════════ -->
+<div class="stats">
+  <div class="stat">
+    <div class="stat-num">10<span>x</span></div>
+    <div class="stat-label">Faster than manual review</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num"><span>~</span>30%</div>
+    <div class="stat-label">Average storage recovered</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">100<span>%</span></div>
+    <div class="stat-label">Local — never uploaded</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">0</div>
+    <div class="stat-label">Account required</div>
+  </div>
+</div>
+
+<!-- ═══ HOW IT WORKS ════════════════════════════════════════════ -->
+<section class="how" id="how-it-works">
+  <div class="section-header">
+    <p class="section-label">How it works</p>
+    <h2 class="section-title">Three steps to a clean library</h2>
+    <p class="section-sub">No complex settings. No learning curve. DupeClear gets out of the way and lets you focus on keeping the photos that matter.</p>
+  </div>
+  <div class="steps">
+
+    <!-- Step 1 -->
+    <div class="step-card">
+      <div class="step-num">1</div>
+      <h3>Select your folder</h3>
+      <p>Drop a folder or browse to it. DupeClear supports all major image formats and scans sub-folders automatically.</p>
+      <div class="step-wireframe">
+        <svg viewBox="0 0 280 160" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%">
+          <rect width="280" height="160" fill="#f5f5f7"/>
+          <!-- Window chrome -->
+          <rect width="280" height="24" fill="#e5e5ea"/>
+          <circle cx="14" cy="12" r="4" fill="#d1d1d6"/>
+          <circle cx="28" cy="12" r="4" fill="#d1d1d6"/>
+          <circle cx="42" cy="12" r="4" fill="#d1d1d6"/>
+          <rect x="80" y="6" width="120" height="12" rx="6" fill="#d1d1d6"/>
+          <!-- Drop zone -->
+          <rect x="20" y="36" width="240" height="110" rx="12" fill="white" stroke="#0071e3" stroke-width="1.5" stroke-dasharray="6 4"/>
+          <!-- Folder icon -->
+          <rect x="116" y="56" width="48" height="36" rx="4" fill="#c7d9f5"/>
+          <rect x="116" y="48" width="24" height="12" rx="4 4 0 0" fill="#a8c4f0"/>
+          <!-- Arrow down -->
+          <rect x="136" y="98" width="2" height="18" rx="1" fill="#0071e3" transform="translate(2,0)"/>
+          <path d="M132 110 l8 8 l8-8" stroke="#0071e3" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <!-- Label -->
+          <rect x="90" y="134" width="100" height="7" rx="3.5" fill="#c7c7cc"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="step-card">
+      <div class="step-num">2</div>
+      <h3>Let it scan</h3>
+      <p>DupeClear uses SHA-256 hashing to find exact duplicates — pixel-perfect matches, not just file names. Scans thousands of files in seconds.</p>
+      <div class="step-wireframe">
+        <svg viewBox="0 0 280 160" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%">
+          <rect width="280" height="160" fill="#f5f5f7"/>
+          <rect width="280" height="24" fill="#e5e5ea"/>
+          <circle cx="14" cy="12" r="4" fill="#d1d1d6"/>
+          <circle cx="28" cy="12" r="4" fill="#d1d1d6"/>
+          <circle cx="42" cy="12" r="4" fill="#d1d1d6"/>
+          <!-- Scanning progress -->
+          <rect x="20" y="38" width="240" height="8" rx="4" fill="#e5e5ea"/>
+          <rect x="20" y="38" width="168" height="8" rx="4" fill="#0071e3"/>
+          <rect x="20" y="56" width="80" height="7" rx="3.5" fill="#c7c7cc"/>
+          <rect x="220" y="56" width="40" height="7" rx="3.5" fill="#0071e3"/>
+          <!-- File list -->
+          <rect x="20" y="76" width="20" height="20" rx="4" fill="#dbeafe"/>
+          <rect x="48" y="80" width="120" height="7" rx="3.5" fill="#c7c7cc"/>
+          <rect x="48" y="92" width="80" height="5" rx="2.5" fill="#e5e5ea"/>
+          <rect x="240" y="80" width="20" height="8" rx="4" fill="#34d399"/>
+
+          <rect x="20" y="104" width="20" height="20" rx="4" fill="#dbeafe"/>
+          <rect x="48" y="108" width="100" height="7" rx="3.5" fill="#c7c7cc"/>
+          <rect x="48" y="120" width="70" height="5" rx="2.5" fill="#e5e5ea"/>
+          <rect x="240" y="108" width="20" height="8" rx="4" fill="#ef4444"/>
+
+          <rect x="20" y="132" width="20" height="20" rx="4" fill="#dbeafe"/>
+          <rect x="48" y="136" width="110" height="7" rx="3.5" fill="#c7c7cc"/>
+          <rect x="48" y="148" width="60" height="5" rx="2.5" fill="#e5e5ea"/>
+          <!-- Spinner -->
+          <circle cx="250" cy="140" r="7" stroke="#e5e5ea" stroke-width="2" fill="none"/>
+          <path d="M250 133 a7 7 0 0 1 7 7" stroke="#0071e3" stroke-width="2" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="step-card">
+      <div class="step-num">3</div>
+      <h3>Review &amp; delete</h3>
+      <p>See every duplicate group side-by-side. Choose which copies to keep, then delete in one click. Your originals stay safe.</p>
+      <div class="step-wireframe">
+        <svg viewBox="0 0 280 160" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%">
+          <rect width="280" height="160" fill="#f5f5f7"/>
+          <rect width="280" height="24" fill="#e5e5ea"/>
+          <circle cx="14" cy="12" r="4" fill="#d1d1d6"/>
+          <circle cx="28" cy="12" r="4" fill="#d1d1d6"/>
+          <circle cx="42" cy="12" r="4" fill="#d1d1d6"/>
+          <!-- Group label -->
+          <rect x="20" y="32" width="70" height="7" rx="3.5" fill="#c7c7cc"/>
+          <rect x="200" y="30" width="60" height="12" rx="6" fill="#ef4444" opacity=".8"/>
+          <rect x="210" y="34" width="40" height="5" rx="2.5" fill="white"/>
+          <!-- Photo pair -->
+          <rect x="20" y="48" width="110" height="80" rx="8" fill="white" stroke="#e5e5ea" stroke-width="1"/>
+          <rect x="28" y="56" width="94" height="56" rx="4" fill="#e5e5ea"/>
+          <rect x="40" y="66" width="40" height="28" rx="3" fill="#d1d1d6"/>
+          <rect x="88" y="74" width="24" height="20" rx="3" fill="#d1d1d6"/>
+          <!-- Keep badge -->
+          <rect x="28" y="116" width="40" height="6" rx="3" fill="#34d399"/>
+          <!-- Copy -->
+          <rect x="150" y="48" width="110" height="80" rx="8" fill="white" stroke="#ef4444" stroke-width="1.5"/>
+          <rect x="158" y="56" width="94" height="56" rx="4" fill="#e5e5ea"/>
+          <rect x="170" y="66" width="40" height="28" rx="3" fill="#d1d1d6"/>
+          <rect x="218" y="74" width="24" height="20" rx="3" fill="#d1d1d6"/>
+          <!-- Delete badge -->
+          <rect x="158" y="116" width="40" height="6" rx="3" fill="#ef4444"/>
+          <!-- Checkbox checked -->
+          <rect x="234" y="52" width="16" height="16" rx="4" fill="#ef4444"/>
+          <path d="M238 60 l3 3 l6-6" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══ FEATURES ════════════════════════════════════════════════ -->
+<section id="features">
+  <div class="section-header" style="max-width:1100px;margin:0 auto 64px;">
+    <p class="section-label">Features</p>
+    <h2 class="section-title">Built for people with real photo libraries</h2>
+    <p class="section-sub">Every feature is designed around how people actually use their photo collections.</p>
+  </div>
+  <div class="features-grid">
+    <div class="feature-cell">
+      <div class="feature-icon blue">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="#0071e3"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2v-4M9 21H5a2 2 0 01-2-2v-4m0 0h18"/></svg>
+      </div>
+      <h3>SHA-256 hashing</h3>
+      <p>Byte-perfect duplicate detection. Two files with different names but identical content are always caught.</p>
+    </div>
+    <div class="feature-cell">
+      <div class="feature-icon green">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="#16a34a"><path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+      </div>
+      <h3>Recursive scanning</h3>
+      <p>Scan entire folder trees at once. DupeClear digs into nested sub-folders automatically so nothing is missed.</p>
+    </div>
+    <div class="feature-cell">
+      <div class="feature-icon purple">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="#7c3aed"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+      </div>
+      <h3>10+ image formats</h3>
+      <p>JPG, PNG, GIF, BMP, TIFF, WEBP, HEIC, RAW and more. Filter by extension or scan everything at once.</p>
+    </div>
+    <div class="feature-cell">
+      <div class="feature-icon orange">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="#ea580c"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+      </div>
+      <h3>Visual review</h3>
+      <p>See thumbnails side-by-side before deleting anything. Compare file size and date to make smart decisions.</p>
+    </div>
+    <div class="feature-cell">
+      <div class="feature-icon red">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="#dc2626"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+      </div>
+      <h3>100% local</h3>
+      <p>Your photos never leave your machine. DupeClear runs entirely offline — no cloud, no telemetry, no account.</p>
+    </div>
+    <div class="feature-cell">
+      <div class="feature-icon teal">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="#0891b2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+      </div>
+      <h3>Fast as lightning</h3>
+      <p>Scans thousands of photos in seconds. A 10,000-file library typically completes in under a minute.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SHOWCASE 1 ════════════════════════════════════════════════ -->
+<section class="showcase">
+  <div class="showcase-inner">
+    <div class="showcase-text">
+      <p class="section-label">Smart scanning</p>
+      <h2>Finds duplicates you'd never spot manually</h2>
+      <p>Renamed files, copies in different folders, exports with slightly different names — DupeClear catches them all using content-based hashing, not just file names.</p>
+      <ul class="check-list">
+        <li>Exact pixel-perfect match detection</li>
+        <li>Works across nested folder structures</li>
+        <li>Handles renamed and moved files</li>
+        <li>Shows file size, date, and full path for each copy</li>
+      </ul>
+    </div>
+    <div class="showcase-visual">
+      <svg viewBox="0 0 480 320" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%">
+        <rect width="480" height="320" fill="#1c1c1e"/>
+        <!-- Scan results header -->
+        <rect x="20" y="20" width="200" height="12" rx="6" fill="#3a3a3c"/>
+        <rect x="380" y="16" width="80" height="20" rx="10" fill="#0071e3"/>
+        <rect x="390" y="22" width="60" height="8" rx="4" fill="white" opacity=".9"/>
+        <!-- Result rows -->
+        <!-- Group 1 -->
+        <rect x="20" y="50" width="440" height="1" fill="#3a3a3c"/>
+        <rect x="20" y="60" width="8" height="8" rx="2" fill="#ef4444"/>
+        <rect x="36" y="58" width="120" height="10" rx="5" fill="#ebebf5" opacity=".6"/>
+        <rect x="36" y="74" width="80" height="7" rx="3.5" fill="#636366"/>
+        <rect x="380" y="58" width="80" height="10" rx="5" fill="#ef4444" opacity=".7"/>
+
+        <rect x="36" y="92" width="44" height="44" rx="6" fill="#2c2c2e"/>
+        <rect x="42" y="98" width="32" height="22" rx="3" fill="#48484a"/>
+        <rect x="42" y="124" width="60" height="6" rx="3" fill="#636366"/>
+        <rect x="42" y="134" width="40" height="5" rx="2.5" fill="#48484a"/>
+
+        <rect x="96" y="92" width="44" height="44" rx="6" fill="#2c2c2e"/>
+        <rect x="102" y="98" width="32" height="22" rx="3" fill="#48484a"/>
+        <rect x="102" y="124" width="60" height="6" rx="3" fill="#636366"/>
+        <rect x="102" y="134" width="40" height="5" rx="2.5" fill="#48484a"/>
+        <!-- Duplicate indicator -->
+        <rect x="118" y="88" width="24" height="12" rx="6" fill="#ef4444"/>
+        <rect x="122" y="92" width="16" height="4" rx="2" fill="white"/>
+
+        <rect x="150" y="92" width="44" height="44" rx="6" fill="#2c2c2e"/>
+        <rect x="156" y="98" width="32" height="22" rx="3" fill="#48484a"/>
+        <rect x="156" y="124" width="60" height="6" rx="3" fill="#636366"/>
+        <rect x="156" y="134" width="40" height="5" rx="2.5" fill="#48484a"/>
+        <rect x="172" y="88" width="24" height="12" rx="6" fill="#ef4444"/>
+        <rect x="176" y="92" width="16" height="4" rx="2" fill="white"/>
+
+        <!-- Group 2 -->
+        <rect x="20" y="152" width="440" height="1" fill="#3a3a3c"/>
+        <rect x="20" y="162" width="8" height="8" rx="2" fill="#ef4444"/>
+        <rect x="36" y="160" width="100" height="10" rx="5" fill="#ebebf5" opacity=".6"/>
+        <rect x="36" y="176" width="80" height="7" rx="3.5" fill="#636366"/>
+        <rect x="380" y="160" width="80" height="10" rx="5" fill="#ef4444" opacity=".7"/>
+
+        <rect x="36" y="194" width="44" height="44" rx="6" fill="#2c2c2e"/>
+        <rect x="42" y="200" width="32" height="22" rx="3" fill="#48484a"/>
+        <rect x="42" y="226" width="60" height="6" rx="3" fill="#636366"/>
+
+        <rect x="96" y="194" width="44" height="44" rx="6" fill="#2c2c2e"/>
+        <rect x="102" y="200" width="32" height="22" rx="3" fill="#48484a"/>
+        <rect x="102" y="226" width="60" height="6" rx="3" fill="#636366"/>
+        <rect x="118" y="190" width="24" height="12" rx="6" fill="#ef4444"/>
+        <rect x="122" y="194" width="16" height="4" rx="2" fill="white"/>
+
+        <!-- Storage savings bar -->
+        <rect x="20" y="256" width="440" height="44" rx="12" fill="#2c2c2e"/>
+        <rect x="32" y="266" width="100" height="8" rx="4" fill="#636366"/>
+        <rect x="32" y="280" width="200" height="8" rx="4" fill="#34d399"/>
+        <rect x="380" y="264" width="68" height="24" rx="12" fill="#34d399" opacity=".2"/>
+        <rect x="386" y="270" width="56" height="12" rx="6" fill="#34d399"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SHOWCASE 2 ════════════════════════════════════════════════ -->
+<section style="background:white;">
+  <div class="showcase-inner reverse" style="max-width:1100px;margin:0 auto;">
+    <div class="showcase-text">
+      <p class="section-label">Safe by design</p>
+      <h2>You decide what gets deleted. Always.</h2>
+      <p>DupeClear never auto-deletes. Every action requires your confirmation. Review the full duplicate group, pick the keeper, then delete the rest — one group at a time or all at once.</p>
+      <ul class="check-list">
+        <li>Confirm before any deletion</li>
+        <li>See original vs duplicate side by side</li>
+        <li>Auto-selects the best copy to keep</li>
+        <li>Delete all at once or group by group</li>
+      </ul>
+    </div>
+    <div class="showcase-visual">
+      <svg viewBox="0 0 480 320" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%">
+        <rect width="480" height="320" fill="#1c1c1e"/>
+        <!-- Confirmation dialog -->
+        <rect x="80" y="60" width="320" height="200" rx="16" fill="#2c2c2e"/>
+        <rect x="80" y="60" width="320" height="200" rx="16" stroke="#3a3a3c" stroke-width="1" fill="none"/>
+        <!-- Warning icon -->
+        <circle cx="240" cy="100" r="20" fill="#fef08a" opacity=".15"/>
+        <circle cx="240" cy="100" r="20" stroke="#fbbf24" stroke-width="1.5" fill="none"/>
+        <rect x="239" y="90" width="2" height="12" rx="1" fill="#fbbf24"/>
+        <circle cx="240" cy="107" r="1.5" fill="#fbbf24"/>
+        <!-- Title -->
+        <rect x="140" y="130" width="200" height="12" rx="6" fill="#ebebf5" opacity=".7"/>
+        <!-- Body -->
+        <rect x="100" y="152" width="280" height="8" rx="4" fill="#636366"/>
+        <rect x="120" y="166" width="240" height="8" rx="4" fill="#636366"/>
+        <!-- File count pill -->
+        <rect x="180" y="184" width="120" height="20" rx="10" fill="#ef4444" opacity=".15"/>
+        <rect x="196" y="190" width="88" height="8" rx="4" fill="#ef4444"/>
+        <!-- Buttons -->
+        <rect x="100" y="220" width="128" height="28" rx="14" fill="#3a3a3c"/>
+        <rect x="116" y="228" width="96" height="10" rx="5" fill="#8e8e93"/>
+        <rect x="252" y="220" width="128" height="28" rx="14" fill="#ef4444"/>
+        <rect x="268" y="228" width="96" height="10" rx="5" fill="white" opacity=".9"/>
+        <!-- Blur background -->
+        <rect x="0" y="0" width="480" height="320" fill="rgba(0,0,0,0)" pointer-events="none"/>
+        <!-- Behind dialog: photo grid -->
+        <rect x="0" y="0" width="480" height="320" fill="#1c1c1e"/>
+        <rect x="20" y="20" width="100" height="70" rx="6" fill="#2c2c2e" opacity=".4"/>
+        <rect x="130" y="20" width="100" height="70" rx="6" fill="#2c2c2e" opacity=".4"/>
+        <rect x="240" y="20" width="100" height="70" rx="6" fill="#2c2c2e" opacity=".4"/>
+        <rect x="360" y="20" width="100" height="70" rx="6" fill="#2c2c2e" opacity=".4"/>
+        <!-- Dimming overlay -->
+        <rect x="0" y="0" width="480" height="320" fill="rgba(0,0,0,0.6)"/>
+        <!-- Redraw dialog on top -->
+        <rect x="80" y="60" width="320" height="200" rx="16" fill="#2c2c2e"/>
+        <rect x="80" y="60" width="320" height="200" rx="16" stroke="#3a3a3c" stroke-width="1" fill="none"/>
+        <circle cx="240" cy="100" r="20" fill="#fef08a" opacity=".1"/>
+        <circle cx="240" cy="100" r="20" stroke="#fbbf24" stroke-width="1.5" fill="none"/>
+        <rect x="239" y="90" width="2" height="12" rx="1" fill="#fbbf24"/>
+        <circle cx="240" cy="107" r="1.5" fill="#fbbf24"/>
+        <rect x="140" y="130" width="200" height="12" rx="6" fill="#ebebf5" opacity=".7"/>
+        <rect x="100" y="152" width="280" height="8" rx="4" fill="#636366"/>
+        <rect x="120" y="166" width="240" height="8" rx="4" fill="#636366"/>
+        <rect x="180" y="184" width="120" height="20" rx="10" fill="#ef4444" opacity=".15"/>
+        <rect x="196" y="190" width="88" height="8" rx="4" fill="#ef4444"/>
+        <rect x="100" y="220" width="128" height="28" rx="14" fill="#3a3a3c"/>
+        <rect x="116" y="228" width="96" height="10" rx="5" fill="#8e8e93"/>
+        <rect x="252" y="220" width="128" height="28" rx="14" fill="#ef4444"/>
+        <rect x="268" y="228" width="96" height="10" rx="5" fill="white" opacity=".9"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ DOWNLOAD ══════════════════════════════════════════════════ -->
+<section class="download" id="download">
+  <p class="section-label" style="color:rgba(255,255,255,.5);">Download</p>
+  <h2>Ready to reclaim your storage?</h2>
+  <p>Free. No installation required for the portable version. Works on Windows 10 and 11.</p>
+  <div class="download-cards">
+    <a class="download-card" href="./releases/DupeClear-Setup.exe" download>
+      <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="48" height="48" rx="12" fill="rgba(255,255,255,.08)"/>
+        <path d="M14 32h20M24 16v16M17 25l7 7 7-7" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <h3>Installer</h3>
+      <p>Full installation with Start Menu shortcut and auto-launch support.</p>
+      <span class="download-btn">Download .exe</span>
+    </a>
+    <a class="download-card" href="./releases/DupeClear-Portable.exe" download>
+      <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="48" height="48" rx="12" fill="rgba(255,255,255,.08)"/>
+        <rect x="12" y="14" width="24" height="20" rx="4" stroke="white" stroke-width="2"/>
+        <path d="M18 34v2M30 34v2M16 36h16" stroke="white" stroke-width="2" stroke-linecap="round"/>
+        <path d="M20 22h8M24 20v4" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <h3>Portable</h3>
+      <p>Run directly from any folder or USB drive. No installation needed.</p>
+      <span class="download-btn">Download .exe</span>
+    </a>
+  </div>
+  <p class="download-note">Windows 10 / 11 &nbsp;&middot;&nbsp; 64-bit &nbsp;&middot;&nbsp; Free &nbsp;&middot;&nbsp; No sign-up</p>
+</section>
+
+<!-- ═══ FOOTER ════════════════════════════════════════════════════ -->
+<footer>
+  <a class="nav-logo" href="#" style="color:rgba(255,255,255,.5)">
+    <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="28" height="28" rx="8" fill="#0071e3" opacity=".6"/>
+      <path d="M8 10h7M8 14h12M8 18h9" stroke="white" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="20" cy="10" r="3" fill="white" opacity=".6"/>
+    </svg>
+    DupeClear
+  </a>
+  <div class="footer-links">
+    <a href="#how-it-works">How it works</a>
+    <a href="#features">Features</a>
+    <a href="#download">Download</a>
+  </div>
+  <p>&copy; 2026 DupeClear. All rights reserved.</p>
+</footer>
+
+</body>
+</html>

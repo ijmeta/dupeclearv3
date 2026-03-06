@@ -1,0 +1,65 @@
+{
+  "name": "dupeclear",
+  "version": "1.0.0",
+  "description": "Photo Duplicate Remover for Windows",
+  "author": "DupeClear",
+  "homepage": "./",
+  "main": "electron/main.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "electron": "electron .",
+    "dist": "npm run build && electron-builder --win --x64",
+    "dist:portable": "npm run build && electron-builder --win portable --x64"
+  },
+  "build": {
+    "appId": "com.dupeclear.app",
+    "productName": "DupeClear",
+    "copyright": "Copyright © 2026 DupeClear",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "public/icon.ico",
+      "requestedExecutionLevel": "asInvoker"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "DupeClear"
+    },
+    "portable": {
+      "artifactName": "DupeClear-Portable-${version}.exe"
+    }
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.2.1",
+    "electron": "^40.8.0",
+    "electron-builder": "^26.8.1",
+    "vite": "^7.3.1"
+  }
+}
